@@ -1,0 +1,90 @@
+name: Macinroid
+
+options:
+  bundleIdPrefix: com.anyfikra
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    DEAD_CODE_STRIPPING: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    # Signed to run locally by default; set a team in Xcode to distribute.
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+
+targets:
+  Macinroid:
+    type: application
+    platform: macOS
+    sources:
+      - path: Macinroid
+    info:
+      path: Macinroid/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Macinroid
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: "Inspired by OpenMTP, © Ganesh Rathinavel (MIT)."
+        NSDesktopFolderUsageDescription: Macinroid shows your Desktop so that you can copy files between it and your phone.
+        NSDocumentsFolderUsageDescription: Macinroid shows your Documents so that you can copy files between them and your phone.
+        NSDownloadsFolderUsageDescription: Macinroid shows your Downloads so that you can copy files between them and your phone.
+        NSRemovableVolumesUsageDescription: Macinroid shows your removable disks so that you can copy files between them and your phone.
+        NSNetworkVolumesUsageDescription: Macinroid shows your network volumes so that you can copy files between them and your phone.
+        # lets files and folders be dropped on the Dock icon to copy them to the phone
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: Files and Folders
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: None
+            LSItemContentTypes: [public.item, public.folder]
+        # GitHub repository ("owner/name") whose releases are offered as updates
+        # and whose issue tracker receives problem reports.
+        MacinroidRepository: ajakka/macinroid
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.anyfikra.macinroid
+        PRODUCT_NAME: Macinroid
+        CODE_SIGN_ENTITLEMENTS: Macinroid/Resources/Macinroid.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_EMIT_LOC_STRINGS: YES
+
+  MacinroidTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: MacinroidTests
+    dependencies:
+      - target: Macinroid
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.anyfikra.macinroid.tests
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid
+
+schemes:
+  Macinroid:
+    build:
+      targets:
+        Macinroid: all
+        MacinroidTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - MacinroidTests
+    archive:
+      config: Release
