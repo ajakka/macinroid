@@ -504,7 +504,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid;
 				PRODUCT_NAME = Macinroid;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -691,7 +691,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid;
 				PRODUCT_NAME = Macinroid;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
