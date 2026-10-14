@@ -113,9 +113,48 @@ actor SimulatedBackend: DeviceBackend {
                 name: name,
                 isFolder: isFolder,
                 size: isFolder ? 0 : Int64(values?.fileSize ?? 0),
-                modified: values?.contentModificationDate
+                modified: values?.contentModificationDate,
+                hasThumbnail: !isFolder && Self.hasThumbnail(name)
             )
         }
+    }
+
+    /// The kinds of file Android makes thumbnails of.
+    private static func hasThumbnail(_ name: String) -> Bool {
+        ["jpg", "jpeg", "heic", "heif", "png", "gif", "bmp"].contains((name as NSString).pathExtension.lowercased())
+    }
+
+    func thumbnail(storage: UInt32, path: String) async throws -> Data? {
+        let file = try url(storage: storage, path: path)
+        guard Self.hasThumbnail(file.lastPathComponent),
+              let source = CGImageSourceCreateWithURL(file as CFURL, nil),
+              // like Android: the picture as stored, not turned upright
+              let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                  kCGImageSourceCreateThumbnailFromImageIfAbsent: true,
+                  kCGImageSourceThumbnailMaxPixelSize: 160,
+              ] as CFDictionary)
+        else { return nil }
+
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data, UTType.jpeg.identifier as CFString, 1, nil) else { return nil }
+        CGImageDestinationAddImage(destination, image, nil)
+        guard CGImageDestinationFinalize(destination) else { return nil }
+        return data as Data
+    }
+
+    func read(storage: UInt32, path: String, offset: Int64, length: Int) async throws -> Data {
+        let file = try url(storage: storage, path: path)
+        guard let handle = try? FileHandle(forReadingFrom: file) else {
+            throw DeviceError(code: .fileObjectRead, detail: "InvalidObjectHandle")
+        }
+        defer { try? handle.close() }
+        try handle.seek(toOffset: UInt64(max(0, offset)))
+        let data = try handle.read(upToCount: length) ?? Data()
+
+        if let rate = configuration.bytesPerSecond, rate > 0 {
+            try await Task.sleep(for: .nanoseconds(Int64(data.count) * 1_000_000_000 / rate))
+        }
+        return data
     }
 
     func makeDirectory(storage: UInt32, path: String) async throws {
@@ -374,7 +413,11 @@ private enum SampleContent {
             let stamp = date.formatted(.iso8601.year().month().day().dateSeparator(.omitted))
             let time = date.formatted(.iso8601.time(includingFractionalSeconds: false).timeSeparator(.omitted)).prefix(6)
             let url = root.appendingPathComponent("DCIM/Camera/IMG_\(stamp)_\(time).jpg")
-            try writeImage(to: url, hue: Double(index) / 18, type: .jpeg, size: CGSize(width: 1600, height: 1200))
+            // as cameras do, every third photo is stored sideways and marked to be turned upright
+            try writeImage(
+                to: url, hue: Double(index) / 18, type: .jpeg, size: CGSize(width: 1600, height: 1200),
+                orientation: index % 3 == 2 ? .right : .up
+            )
             try fileManager.setAttributes([.modificationDate: date], ofItemAtPath: url.path)
         }
         for index in 0..<5 {
@@ -429,7 +472,7 @@ private enum SampleContent {
         }
     }
 
-    private static func writeImage(to url: URL, hue: Double, type: UTType, size: CGSize) throws {
+    private static func writeImage(to url: URL, hue: Double, type: UTType, size: CGSize, orientation: CGImagePropertyOrientation = .up) throws {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         guard let context = CGContext(
             data: nil, width: Int(size.width), height: Int(size.height), bitsPerComponent: 8, bytesPerRow: 0,
@@ -470,7 +513,12 @@ private enum SampleContent {
         guard let image = context.makeImage(),
               let destination = CGImageDestinationCreateWithURL(url as CFURL, type.identifier as CFString, 1, nil)
         else { return }
-        CGImageDestinationAddImage(destination, image, [kCGImageDestinationLossyCompressionQuality: 0.8] as CFDictionary)
+        CGImageDestinationAddImage(destination, image, [
+            kCGImageDestinationLossyCompressionQuality: 0.8,
+            // cameras put a small picture in the EXIF data of every photo
+            kCGImageDestinationEmbedThumbnail: type == .jpeg,
+            kCGImagePropertyOrientation: orientation.rawValue,
+        ] as CFDictionary)
         CGImageDestinationFinalize(destination)
     }
 }

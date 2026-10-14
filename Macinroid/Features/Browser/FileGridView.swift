@@ -126,9 +126,13 @@ struct FileGridView: NSViewRepresentable {
         func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
             let view = collectionView.makeItem(withIdentifier: FileGridItem.identifier, for: indexPath)
             if let view = view as? FileGridItem, items.indices.contains(indexPath.item) {
-                view.show(items[indexPath.item], in: pane)
+                view.show(items[indexPath.item], in: pane, app: app)
             }
             return view
+        }
+
+        func collectionView(_ collectionView: NSCollectionView, didEndDisplaying item: NSCollectionViewItem, forRepresentedObjectAt indexPath: IndexPath) {
+            (item as? FileGridItem)?.stopPreview()
         }
 
         // MARK: Selection
@@ -147,9 +151,7 @@ struct FileGridView: NSViewRepresentable {
             if selected != browser.selection {
                 browser.selection = selected
             }
-            if pane == .mac {
-                app.quickLook.update(browser.selectedItems.map { URL(fileURLWithPath: $0.path) })
-            }
+            app.selectionDidChange(in: pane)
         }
 
         // MARK: Actions
@@ -307,7 +309,7 @@ final class FileCollectionView: NSCollectionView {
     // Quick Look takes its files from whichever view is first responder.
     // AppKit calls these on the main thread, although it does not say so.
     override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
-        MainActor.assumeIsolated { coordinator?.pane == .mac }
+        true
     }
 
     override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
@@ -343,6 +345,7 @@ final class FileGridItem: NSCollectionViewItem {
     private let icon = NSImageView()
     private let label = NSTextField(wrappingLabelWithString: "")
     private var shownPath: String?
+    private var preview: PhoneThumbnails.Ticket?
 
     override func loadView() {
         let background = SelectionBackgroundView()
@@ -390,23 +393,29 @@ final class FileGridItem: NSCollectionViewItem {
         }
     }
 
-    func show(_ item: FileItem, in pane: PaneKind) {
+    func show(_ item: FileItem, in pane: PaneKind, app: AppModel) {
+        stopPreview()
         shownPath = item.path
         label.stringValue = item.name
         label.toolTip = item.name
         icon.image = FileIcons.icon(for: item, in: pane)
 
-        if pane == .mac {
-            let scale = view.window?.backingScaleFactor ?? 2
-            FileIcons.thumbnail(for: item, size: Self.iconSize, scale: scale) { [weak self] image in
-                // the cell may have been reused for another file in the meantime
-                if self?.shownPath == item.path { self?.icon.image = image }
-            }
+        let scale = view.window?.backingScaleFactor ?? 2
+        preview = app.requestIconPreview(for: item, in: pane, size: Self.iconSize, scale: scale) { [weak self] image in
+            // the cell may have been reused for another file in the meantime
+            if self?.shownPath == item.path { self?.icon.image = image }
         }
+    }
+
+    /// Gives up on the picture asked for, as when the item scrolls out of view.
+    func stopPreview() {
+        preview?.cancel()
+        preview = nil
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        stopPreview()
         shownPath = nil
         icon.image = nil
     }

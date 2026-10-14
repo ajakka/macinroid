@@ -360,6 +360,10 @@ final class FakeMTPDevice: MTPTransport, @unchecked Sendable {
             let values = try? object.url.resourceValues(forKeys: [.fileSizeKey, .contentModificationDateKey])
             info.compressedSize = hidesSizes && !object.isFolder ? MTPObjectInfo.sizeUnknown : UInt32(clamping: values?.fileSize ?? 0)
             info.modificationDate = values?.contentModificationDate
+            if Self.hasThumbnail(object) {
+                info.thumbFormat = 0x3801
+                info.thumbCompressedSize = UInt32(Self.thumbnail(of: object.name).count)
+            }
             send((try? info.encoded()) ?? Data(), code: code, transaction: transaction)
 
         case .getObjectPropValue:
@@ -458,7 +462,33 @@ final class FakeMTPDevice: MTPTransport, @unchecked Sendable {
                 return respond(.invalidObjectHandle, transaction: transaction)
             }
             send(contents, code: code, transaction: transaction)
+
+        case .getThumb:
+            guard let object = objects[parameter(0)] else { return respond(.invalidObjectHandle, transaction: transaction) }
+            guard Self.hasThumbnail(object) else { return respond(MTPResponseCode(rawValue: 0x2010), transaction: transaction) }
+            send(Self.thumbnail(of: object.name), code: code, transaction: transaction)
+
+        case .getPartialObject, .getPartialObject64:
+            guard let object = objects[parameter(0)], !object.isFolder, let reader = try? FileHandle(forReadingFrom: object.url) else {
+                return respond(.invalidObjectHandle, transaction: transaction)
+            }
+            defer { try? reader.close() }
+            let isWide = operation == .getPartialObject64
+            let offset = isWide ? UInt64(parameter(1)) | UInt64(parameter(2)) << 32 : UInt64(parameter(1))
+            let length = Int(isWide ? parameter(3) : parameter(2))
+            try? reader.seek(toOffset: offset)
+            send((try? reader.read(upToCount: length)) ?? Data(), code: code, transaction: transaction)
         }
+    }
+
+    /// Photos have a thumbnail, as on a phone; other files do not.
+    private static func hasThumbnail(_ object: Object) -> Bool {
+        !object.isFolder && object.name.lowercased().hasSuffix(".jpg")
+    }
+
+    /// What the device answers GetThumb with for a photo.
+    static func thumbnail(of name: String) -> Data {
+        Data("thumbnail of \(name)".utf8)
     }
 
     private func discardAnnouncedObject() {

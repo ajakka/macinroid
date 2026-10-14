@@ -9,8 +9,8 @@ and paste between the two.
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/transfer-dark.png">
-    <img src="docs/transfer-light.png" width="820" alt="A transfer in progress, with overall progress, speed, time remaining and a button to cancel">
+    <source media="(prefers-color-scheme: dark)" srcset="Documents/transfer-dark.png">
+    <img src="Documents/transfer-light.png" width="820" alt="A transfer in progress, with overall progress, speed, time remaining and a button to cancel">
   </picture>
 </p>
 
@@ -18,6 +18,8 @@ and paste between the two.
 
 - Drag and drop files between the two systems
 - Browse the phone's internal storage and SD card from the sidebar.
+- Thumbnails of the phone's photos and videos, in list and icon view.
+- Quick Look any file on the phone with Space.
 - Storage capacity at a glance, and the phone's details under *Device Info*.
 - Light and dark appearance, and Liquid Glass on macOS 26.
 - One universal app for Apple silicon and Intel. No drivers, no extra software.
@@ -51,6 +53,7 @@ with every USB device macOS sees and a trace of the connection attempt.
 | Rename | Return |
 | Delete | ⌘⌫ |
 | Open | ⌘O or ⌘↓ |
+| Quick Look | Space or ⌘Y |
 | Enclosing folder | ⌘↑ |
 | Back / Forward | ⌘[ / ⌘] |
 | Go to folder | ⇧⌘G |
@@ -128,6 +131,8 @@ the same wire protocol, down to short and empty USB packets.
 - Finder can only paste files that are already on the Mac, so copying on the
   phone fetches the items to a temporary folder first. For large amounts,
   dragging to Finder or *Download* is quicker.
+- Quick Look shows a copy of the file on the Mac, so a large video takes a moment
+  to arrive before it plays.
 - Files can't be moved within the phone. Copying within it works by copy and
   paste.
 - Cancelling in the middle of a file relies on the phone honouring MTP's cancel

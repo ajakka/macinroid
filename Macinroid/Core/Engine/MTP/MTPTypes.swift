@@ -10,9 +10,13 @@ enum MTPOperation: UInt16 {
     case getObjectHandles = 0x1007
     case getObjectInfo = 0x1008
     case getObject = 0x1009
+    case getThumb = 0x100A
     case deleteObject = 0x100B
     case sendObjectInfo = 0x100C
     case sendObject = 0x100D
+    case getPartialObject = 0x101B
+    /// Android's GetPartialObject for offsets beyond 4 GB.
+    case getPartialObject64 = 0x95C1
     case getObjectPropValue = 0x9803
     case setObjectPropValue = 0x9804
 }
@@ -213,6 +217,9 @@ struct MTPObjectInfo: Equatable, Sendable {
     }
 
     var isFolder: Bool { objectFormat == MTPObjectFormat.association }
+
+    /// Whether the device keeps a small picture of the object, which GetThumb returns.
+    var hasThumbnail: Bool { thumbCompressedSize > 0 }
 }
 
 /// A failure of the engine, before it is put into the app's terms.

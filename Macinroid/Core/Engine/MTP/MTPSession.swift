@@ -168,6 +168,19 @@ final class MTPSession {
         _ = try run(.getObject, [handle], receive: sink, progress: progress)
     }
 
+    /// The small picture the device keeps of an object, usually a JPEG.
+    func getThumb(_ handle: UInt32) throws -> Data {
+        try receive(.getThumb, [handle])
+    }
+
+    /// Up to `length` bytes of an object's contents from `offset`; fewer at its end.
+    func getPartialObject(_ handle: UInt32, offset: UInt64, length: UInt32) throws -> Data {
+        if offset + UInt64(length) <= UInt64(UInt32.max) {
+            return try receive(.getPartialObject, [handle, UInt32(offset), length])
+        }
+        return try receive(.getPartialObject64, [handle, UInt32(truncatingIfNeeded: offset), UInt32(offset >> 32), length])
+    }
+
     private func receive(_ operation: MTPOperation, _ parameters: [UInt32] = []) throws -> Data {
         var received = Data()
         _ = try run(operation, parameters, receive: { received.append($0) })

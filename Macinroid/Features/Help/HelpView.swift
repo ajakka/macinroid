@@ -190,7 +190,7 @@ struct KeyboardShortcutsView: View {
             Shortcut(title: "Open", keys: [["⌘", "O"], ["⌘", "↓"]]),
             Shortcut(title: "Rename", keys: [["Return"]]),
             Shortcut(title: "Move to Trash, or delete from the phone", keys: [["⌘", "⌫"], ["⌫"]]),
-            Shortcut(title: "Quick Look (Mac)", keys: [["Space"], ["⌘", "Y"]]),
+            Shortcut(title: "Quick Look", keys: [["Space"], ["⌘", "Y"]]),
             Shortcut(title: "Show in Finder (Mac)", keys: [["⌥", "⌘", "R"]]),
         ]),
         ("Copying", [

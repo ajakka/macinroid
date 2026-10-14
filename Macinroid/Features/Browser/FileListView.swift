@@ -191,8 +191,16 @@ struct FileListView: NSViewRepresentable {
             case .name:
                 cell.label.stringValue = item.name
                 cell.label.toolTip = item.name
-                cell.icon?.image = FileIcons.icon(for: item, in: pane)
                 cell.label.textColor = .labelColor
+                cell.icon?.image = FileIcons.icon(for: item, in: pane)
+                cell.stopPreview()
+                cell.shownPath = item.path
+                cell.preview = app.requestIconPreview(
+                    for: item, in: pane, size: FileCellView.iconSize, scale: tableView.window?.backingScaleFactor ?? 2
+                ) { [weak cell] image in
+                    // the cell may have been reused for another file in the meantime
+                    if cell?.shownPath == item.path { cell?.icon?.image = image }
+                }
             case .modified:
                 cell.label.stringValue = Format.date(item.modified)
                 cell.label.textColor = .secondaryLabelColor
@@ -207,6 +215,12 @@ struct FileListView: NSViewRepresentable {
             return cell
         }
 
+        func tableView(_ tableView: NSTableView, didRemove rowView: NSTableRowView, forRow row: Int) {
+            for column in 0..<rowView.numberOfColumns {
+                (rowView.view(atColumn: column) as? FileCellView)?.stopPreview()
+            }
+        }
+
         func tableView(_ tableView: NSTableView, typeSelectStringFor tableColumn: NSTableColumn?, row: Int) -> String? {
             items.indices.contains(row) ? items[row].name : nil
         }
@@ -219,9 +233,7 @@ struct FileListView: NSViewRepresentable {
             if selected != browser.selection {
                 browser.selection = selected
             }
-            if pane == .mac {
-                app.quickLook.update(browser.selectedItems.map { URL(fileURLWithPath: $0.path) })
-            }
+            app.selectionDidChange(in: pane)
         }
 
         func tableView(_ tableView: NSTableView, sortDescriptorsDidChange oldDescriptors: [NSSortDescriptor]) {
@@ -363,7 +375,7 @@ final class FileTableView: NSTableView {
     // Quick Look takes its files from whichever view is first responder.
     // AppKit calls these on the main thread, although it does not say so.
     override func acceptsPreviewPanelControl(_ panel: QLPreviewPanel!) -> Bool {
-        MainActor.assumeIsolated { coordinator?.pane == .mac }
+        true
     }
 
     override func beginPreviewPanelControl(_ panel: QLPreviewPanel!) {
@@ -381,8 +393,18 @@ final class FileTableView: NSTableView {
 
 /// A table cell with a label and, in the name column, an icon.
 final class FileCellView: NSTableCellView {
+    static let iconSize: CGFloat = 18
+
     let label = NSTextField(labelWithString: "")
     private(set) var icon: NSImageView?
+    /// The file whose icon is shown, and the picture of it that was asked for.
+    var shownPath: String?
+    var preview: PhoneThumbnails.Ticket?
+
+    func stopPreview() {
+        preview?.cancel()
+        preview = nil
+    }
 
     init(identifier: NSUserInterfaceItemIdentifier, showsIcon: Bool) {
         super.init(frame: .zero)
@@ -406,8 +428,8 @@ final class FileCellView: NSTableCellView {
             NSLayoutConstraint.activate([
                 icon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 2),
                 icon.centerYAnchor.constraint(equalTo: centerYAnchor),
-                icon.widthAnchor.constraint(equalToConstant: 18),
-                icon.heightAnchor.constraint(equalToConstant: 18),
+                icon.widthAnchor.constraint(equalToConstant: Self.iconSize),
+                icon.heightAnchor.constraint(equalToConstant: Self.iconSize),
                 label.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 6),
             ])
         } else {

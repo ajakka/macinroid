@@ -27,6 +27,13 @@ protocol DeviceBackend: Sendable {
 
     func rename(storage: UInt32, path: String, newName: String) async throws
 
+    /// The small picture the device keeps of a file, usually a JPEG, or nil
+    /// when it has none. Listings say which files have one.
+    func thumbnail(storage: UInt32, path: String) async throws -> Data?
+
+    /// Up to `length` bytes of a file from `offset`; fewer at its end.
+    func read(storage: UInt32, path: String, offset: Int64, length: Int) async throws -> Data
+
     /// Copies files between the Mac and the device. The stream finishes when
     /// the transfer is done and throws a `DeviceError` when it fails or is cancelled.
     func transfer(_ request: TransferRequest) -> AsyncThrowingStream<TransferEvent, any Error>

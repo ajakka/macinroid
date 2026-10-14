@@ -200,6 +200,66 @@ final class MTPEngineTests: XCTestCase {
         XCTAssertTrue(sdCard.isEmpty)
     }
 
+    // MARK: Looking inside files
+
+    func testListingsSayWhichFilesHaveThumbnails() async throws {
+        try phoneFile("DCIM/a.jpg")
+        try phoneFile("DCIM/b.txt")
+        _ = try await backend.connect()
+
+        let items = try await backend.list(storage: storage, path: "/DCIM", includeHidden: false)
+        XCTAssertEqual(items.first { $0.name == "a.jpg" }?.hasThumbnail, true)
+        XCTAssertEqual(items.first { $0.name == "b.txt" }?.hasThumbnail, false)
+    }
+
+    func testTheThumbnailOfAFileJustListedTakesOneRequest() async throws {
+        try phoneFile("DCIM/Camera/a.jpg")
+        try phoneFile("DCIM/Camera/b.txt")
+        _ = try await backend.connect()
+        _ = try await backend.list(storage: storage, path: "/DCIM/Camera", includeHidden: false)
+
+        let before = device.operations.count
+        let thumbnail = try await backend.thumbnail(storage: storage, path: "/DCIM/Camera/a.jpg")
+        XCTAssertEqual(thumbnail, FakeMTPDevice.thumbnail(of: "a.jpg"))
+        XCTAssertEqual(Array(device.operations.dropFirst(before)), [MTPOperation.getThumb.rawValue])
+
+        // a file without one has none, and the session carries on
+        let none = try await backend.thumbnail(storage: storage, path: "/DCIM/Camera/b.txt")
+        XCTAssertNil(none)
+        let items = try await backend.list(storage: storage, path: "/DCIM/Camera", includeHidden: false)
+        XCTAssertEqual(items.count, 2)
+    }
+
+    func testReadingPartOfAFile() async throws {
+        let contents = bytes(10_000)
+        try phoneFile("Download/data.bin", contents)
+        _ = try await backend.connect()
+
+        let middle = try await backend.read(storage: storage, path: "/Download/data.bin", offset: 1000, length: 3000)
+        XCTAssertEqual(middle, contents.subdata(in: 1000..<4000))
+        let end = try await backend.read(storage: storage, path: "/Download/data.bin", offset: 9000, length: 5000)
+        XCTAssertEqual(end, contents.subdata(in: 9000..<10_000))
+        XCTAssertEqual(device.operations.last, MTPOperation.getPartialObject.rawValue)
+    }
+
+    func testReadingBeyondFourGigabytes() async throws {
+        // a sparse file of 5 GB, which takes up next to no room
+        let url = onPhone("Movies/long.mp4")
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        FileManager.default.createFile(atPath: url.path, contents: nil)
+        let writer = try FileHandle(forWritingTo: url)
+        try writer.truncate(atOffset: 5 << 30)
+        try writer.seek(toOffset: (4 << 30) + 100)
+        try writer.write(contentsOf: Data([1, 2, 3, 4]))
+        try writer.close()
+        device.rescan()
+        _ = try await backend.connect()
+
+        let data = try await backend.read(storage: storage, path: "/Movies/long.mp4", offset: (4 << 30) + 100, length: 4)
+        XCTAssertEqual(data, Data([1, 2, 3, 4]))
+        XCTAssertEqual(device.operations.last, MTPOperation.getPartialObject64.rawValue)
+    }
+
     func testSizesThatDoNotFitTheSizeFieldComeFromTheProperty() async throws {
         try phoneFile("movie.mkv", bytes(70_000))
         device.hidesSizes = true

@@ -1,7 +1,7 @@
 name: Macinroid
 
 options:
-  bundleIdPrefix: com.anyfikra
+  bundleIdPrefix: com
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
@@ -52,7 +52,7 @@ targets:
         MacinroidRepository: ajakka/macinroid
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.anyfikra.macinroid
+        PRODUCT_BUNDLE_IDENTIFIER: com.macinroid
         PRODUCT_NAME: Macinroid
         CODE_SIGN_ENTITLEMENTS: Macinroid/Resources/Macinroid.entitlements
         ENABLE_HARDENED_RUNTIME: YES
@@ -69,7 +69,7 @@ targets:
       - target: Macinroid
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.anyfikra.macinroid.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.macinroid.tests
         GENERATE_INFOPLIST_FILE: YES
         BUNDLE_LOADER: $(TEST_HOST)
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid

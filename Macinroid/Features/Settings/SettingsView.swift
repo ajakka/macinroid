@@ -68,7 +68,7 @@ private struct BrowserSettings: View {
                 ))
             }
 
-            Section("View") {
+            Section {
                 Picker("Mac", selection: $settings.macViewMode) {
                     ForEach(ViewMode.allCases) { Text($0.title).tag($0) }
                 }
@@ -76,7 +76,15 @@ private struct BrowserSettings: View {
                     ForEach(ViewMode.allCases) { Text($0.title).tag($0) }
                 }
                 Toggle("Keep folders on top", isOn: $settings.foldersFirst)
+                Toggle("Show icon previews", isOn: Binding(
+                    get: { settings.showIconPreviews },
+                    set: { app.setShowsIconPreviews($0) }
+                ))
                 Toggle("Show status bar", isOn: $settings.showStatusBar)
+            } header: {
+                Text("View")
+            } footer: {
+                Text("Icon previews of the phone’s photos are read over the cable as you browse.")
             }
 
             Section {

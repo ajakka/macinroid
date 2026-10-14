@@ -21,6 +21,8 @@ struct FileItem: Identifiable, Hashable, Sendable {
     var modified: Date?
     /// Set for bundles such as apps: a directory that the Mac presents as one file.
     var isPackage = false
+    /// Set for files on the phone of which the phone keeps a small picture.
+    var hasThumbnail = false
 
     var id: String { path }
 

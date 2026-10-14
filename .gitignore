@@ -7,3 +7,6 @@ DerivedData/
 *.xcuserstate
 xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Environment
+.env

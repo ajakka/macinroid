@@ -252,6 +252,18 @@ private struct PaneStatusBar: View {
                     .lineLimit(1)
             }
 
+            if pane == .phone, let fetch = app.phoneFiles.current {
+                HStack(spacing: 6) {
+                    ProgressView(value: Double(min(fetch.bytesDone, fetch.bytesTotal)), total: Double(max(fetch.bytesTotal, 1)))
+                        .controlSize(.small)
+                        .frame(width: 60)
+                    Text("Loading “\(fetch.name)” for Quick Look")
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                .transition(.opacity)
+            }
+
             if let clipboard = app.clipboard, clipboard.source == pane {
                 clipboardLabel(clipboard)
             }

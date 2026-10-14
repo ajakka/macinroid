@@ -11,7 +11,7 @@ final class MTPBackend: DeviceBackend, @unchecked Sendable {
     typealias Connector = @Sendable () throws -> any MTPTransport
 
     private let connector: Connector
-    private let queue = DispatchQueue(label: "com.anyfikra.macinroid.mtp", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.macinroid.mtp", qos: .userInitiated)
     private let cancelledTransfers = OSAllocatedUnfairLock(initialState: Set<UInt64>())
 
     /// The open connection. Only touched on `queue`.
@@ -102,6 +102,14 @@ final class MTPBackend: DeviceBackend, @unchecked Sendable {
 
     func rename(storage: UInt32, path: String, newName: String) async throws {
         try await perform { try $0.rename(storage: storage, path: path, newName: newName) }
+    }
+
+    func thumbnail(storage: UInt32, path: String) async throws -> Data? {
+        try await perform { try $0.thumbnail(storage: storage, path: path) }
+    }
+
+    func read(storage: UInt32, path: String, offset: Int64, length: Int) async throws -> Data {
+        try await perform { try $0.read(storage: storage, path: path, offset: offset, length: length) }
     }
 
     func transfer(_ request: TransferRequest) -> AsyncThrowingStream<TransferEvent, any Error> {

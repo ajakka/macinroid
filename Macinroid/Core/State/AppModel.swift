@@ -87,6 +87,11 @@ final class AppModel {
     /// Answers questions in place of an alert; tests use it to stand in for the user.
     @ObservationIgnored var alertHandler: (@MainActor (_ title: String, _ message: String, _ buttons: [String]) async -> Int)?
     @ObservationIgnored let quickLook = QuickLookController()
+    /// Copies of phone files, for Quick Look and for opening them.
+    let phoneFiles: PhoneFileCache
+    @ObservationIgnored let phoneThumbnails: PhoneThumbnails
+    /// The phone files being fetched for Quick Look, by path.
+    @ObservationIgnored private var previewFetches: [String: Task<Void, Never>] = [:]
 
     /// The system clipboard; tests substitute one of their own.
     @ObservationIgnored var pasteboard = NSPasteboard.general
@@ -110,6 +115,8 @@ final class AppModel {
         activePane = settings.showMacPane ? .mac : .phone
         session = DeviceSession(backend: backend)
         transfers = TransferCoordinator(backend: backend)
+        phoneFiles = PhoneFileCache(backend: backend, folder: Self.scratchRoot.appendingPathComponent("Previews", isDirectory: true))
+        phoneThumbnails = PhoneThumbnails(backend: backend, files: phoneFiles)
 
         mac = BrowserModel(kind: .mac, path: LocalFileSystem.homePath, settings: settings) { path, includeHidden in
             try await Task.detached(priority: .userInitiated) {
@@ -132,6 +139,17 @@ final class AppModel {
 
         session.onConnected = { [weak self] in await self?.phoneDidConnect() }
         transfers.onJobEnded = { [weak self] job in await self?.transferDidEnd(job) }
+        transfers.beforeEachJob = { [weak self] in await self?.makeWayForTransfer() }
+
+        phoneFiles.onSessionEnded = { [weak self] error in await self?.recover(from: error) }
+        // as when listing a folder fails
+        phoneThumbnails.onSessionEnded = { [weak self] error in self?.session.noteFailure(error) }
+        phoneThumbnails.isEnabled = { [weak self] in
+            guard let self else { return false }
+            return settings.showIconPreviews && isAvailable(.phone)
+        }
+        quickLook.onShowItem = { [weak self] item in self?.loadPreview(of: item) }
+        quickLook.onClose = { [weak self] in self?.stopLoadingPreviews() }
     }
 
     // MARK: Lifecycle
@@ -302,6 +320,7 @@ final class AppModel {
     func selectStorage(_ id: UInt32) {
         guard id != session.selectedStorageID else { return }
         session.selectStorage(id)
+        phoneThumbnails.cancelAll()
         phone.reset()
         phoneShortcuts = []
         activate(.phone)
@@ -311,6 +330,14 @@ final class AppModel {
     func setShowsHiddenFiles(_ value: Bool, in pane: PaneKind) {
         settings.setShowsHiddenFiles(value, in: pane)
         Task { await browser(pane).reload() }
+    }
+
+    func setShowsIconPreviews(_ value: Bool) {
+        settings.showIconPreviews = value
+        if !value { phoneThumbnails.cancelAll() }
+        // draws every icon again
+        mac.rebuild()
+        phone.rebuild()
     }
 
     /// Re-sorts both panes after a setting that affects the order changed.
@@ -334,6 +361,126 @@ final class AppModel {
         guard phone.path == FilePath.root, phone.error == nil else { return }
         let folders = Set(phone.unfilteredItems.filter(\.isFolder).map(\.name))
         phoneShortcuts = Self.wellKnownPhoneFolders.filter(folders.contains)
+    }
+
+    // MARK: Previews
+
+    /// Asks for a picture of the file's contents to show in place of its
+    /// icon. `completion` may be called at once, later, or never. Returns a
+    /// ticket to cancel once the file is out of view, when there is one.
+    @discardableResult
+    func requestIconPreview(
+        for item: FileItem, in pane: PaneKind, size: CGFloat, scale: CGFloat, completion: @escaping @MainActor (NSImage) -> Void
+    ) -> PhoneThumbnails.Ticket? {
+        guard settings.showIconPreviews else { return nil }
+        switch pane {
+        case .mac:
+            FileIcons.thumbnail(for: item, size: size, scale: scale, completion: completion)
+            return nil
+        case .phone:
+            guard let storage = session.selectedStorageID else { return nil }
+            return phoneThumbnails.request(item, storage: storage, completion: completion)
+        }
+    }
+
+    func canQuickLook(in pane: PaneKind) -> Bool {
+        quickLook.isVisible || !previewItems(for: pane).isEmpty
+    }
+
+    /// Opens Quick Look for the selection, or closes it.
+    func toggleQuickLook(in pane: PaneKind) {
+        if quickLook.isVisible {
+            quickLook.close()
+            return
+        }
+        let items = previewItems(for: pane)
+        guard !items.isEmpty else {
+            NSSound.beep()
+            return
+        }
+        quickLook.toggle(items)
+    }
+
+    /// Keeps an open Quick Look panel in step with the selection.
+    func selectionDidChange(in pane: PaneKind) {
+        guard quickLook.isVisible, pane == activePane else { return }
+        quickLook.update(previewItems(for: pane))
+    }
+
+    /// What Quick Look shows for the pane's selection. Folders on the phone are left out.
+    func previewItems(for pane: PaneKind) -> [PreviewItem] {
+        let selected = browser(pane).selectedItems
+        switch pane {
+        case .mac:
+            return selected.map { PreviewItem(macFile: $0.path) }
+        case .phone:
+            guard isAvailable(.phone), let storage = session.selectedStorageID else { return [] }
+            return selected.filter { !$0.isFolder }.map { item in
+                // an item already in the panel keeps its place, and its copy
+                quickLook.items.first { $0.id == item.path && $0.phoneFile?.item == item }
+                    ?? PreviewItem(phoneFile: item, storage: storage, localCopy: phoneFiles.localCopy(of: item, storage: storage))
+            }
+        }
+    }
+
+    /// Fetches the phone file the panel has moved to, and stops fetching the ones it has left.
+    private func loadPreview(of preview: PreviewItem) {
+        for (path, task) in previewFetches where path != preview.id {
+            task.cancel()
+            previewFetches[path] = nil
+        }
+        guard preview.previewItemURL == nil, previewFetches[preview.id] == nil, let (item, storage) = preview.phoneFile else { return }
+
+        previewFetches[preview.id] = Task {
+            // a cancelled fetch has been taken off the list already, and may have been replaced
+            defer { if !Task.isCancelled { previewFetches[preview.id] = nil } }
+            do {
+                preview.previewItemURL = try await phoneFiles.fetch(item, storage: storage, urgent: true)
+                quickLook.itemDidLoad(preview)
+            } catch {
+                let error = DeviceError(error)
+                guard !error.isCancellation, !Task.isCancelled else { return }
+                if quickLook.currentItem === preview {
+                    quickLook.close()
+                    present(error, doing: "“\(item.name)” can’t be shown.")
+                }
+            }
+        }
+    }
+
+    private func stopLoadingPreviews() {
+        previewFetches.values.forEach { $0.cancel() }
+        previewFetches = [:]
+    }
+
+    /// Stops everything that reads from the phone in the background, before
+    /// a transfer takes the connection for itself.
+    private func makeWayForTransfer() async {
+        if quickLook.isShowingPhoneFiles {
+            quickLook.close()
+        }
+        stopLoadingPreviews()
+        phoneThumbnails.cancelAll()
+        await phoneFiles.stopAll()
+    }
+
+    /// Picks up after a request that ended the session. Returns whether a new session was opened.
+    @discardableResult
+    private func recover(from error: DeviceError) async -> Bool {
+        guard error.endsSession else { return false }
+        if error.isCancellation {
+            // Stopping midway leaves the session unusable, but the phone
+            // is still there: open a new one, unless the app is on its way out.
+            guard !isQuitting else { return false }
+            await session.reconnect()
+            return session.isConnected
+        }
+        // The phone is gone. Say so at once, and pick it up again if it comes back.
+        session.noteFailure(error)
+        if settings.connectAutomatically {
+            session.connectPersistently(attempts: 4)
+        }
+        return false
     }
 
     // MARK: New folder, rename, delete
@@ -721,6 +868,20 @@ final class AppModel {
 
         let folder = Self.makeScratchFolder("Opened")
 
+        // files seen in Quick Look are on the Mac already; a clone of the
+        // copy can be changed without changing what Quick Look shows
+        let copies = items.compactMap { phoneFiles.localCopy(of: $0, storage: storage) }
+        if copies.count == items.count {
+            for copy in copies {
+                let opened = folder.appendingPathComponent(copy.lastPathComponent)
+                if (try? FileManager.default.copyItem(at: copy, to: opened)) != nil {
+                    NSWorkspace.shared.open(opened)
+                }
+            }
+            return
+        }
+
+
         download(items.map(\.path), storageID: storage, to: folder.path) { succeeded in
             guard succeeded else { return }
             for item in items {
@@ -815,21 +976,8 @@ final class AppModel {
         let error = transfers.lastError
         var didReconnect = false
 
-        if let error, error.endsSession {
-            if error.isCancellation {
-                // Stopping midway leaves the session unusable, but the phone
-                // is still there: open a new one, unless the app is on its way out.
-                if !isQuitting {
-                    await session.reconnect()
-                    didReconnect = session.isConnected
-                }
-            } else {
-                // The phone is gone. Say so at once, and pick it up again if it comes back.
-                session.noteFailure(error)
-                if settings.connectAutomatically {
-                    session.connectPersistently(attempts: 4)
-                }
-            }
+        if let error {
+            didReconnect = await recover(from: error)
         }
 
         if let aborted = error?.abortedPath {

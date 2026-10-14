@@ -40,11 +40,9 @@ struct AppCommands: Commands {
             Button("Open") { run { app.openSelection(in: pane) } }
                 .keyboardShortcut("o")
                 .disabled(!hasSelection)
-            Button("Quick Look") {
-                run { app.quickLook.toggle(browser.selectedItems.map { URL(fileURLWithPath: $0.path) }) }
-            }
-            .keyboardShortcut("y")
-            .disabled(!hasSelection || pane != .mac)
+            Button("Quick Look") { run { app.toggleQuickLook(in: pane) } }
+                .keyboardShortcut("y")
+                .disabled(!hasSelection || !app.canQuickLook(in: pane))
             Button("Show in Finder") { run { app.showInFinder(browser.selectedItems) } }
                 .keyboardShortcut("r", modifiers: [.command, .option])
                 .disabled(!hasSelection || pane != .mac)

@@ -4,7 +4,7 @@ import os
 /// Writes to the unified log and to a plain-text file that the user can attach
 /// to a problem report.
 enum Log {
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.anyfikra.macinroid", category: "app")
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.macinroid", category: "app")
     private static let file = LogFile()
 
     /// `~/Library/Logs/Macinroid/Macinroid.log`
@@ -27,7 +27,7 @@ enum Log {
 
     private final class LogFile: @unchecked Sendable {
         let url: URL
-        private let queue = DispatchQueue(label: "com.anyfikra.macinroid.log", qos: .utility)
+        private let queue = DispatchQueue(label: "com.macinroid.log", qos: .utility)
         private let maxSize = 2 << 20
 
         init() {

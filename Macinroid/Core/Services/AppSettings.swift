@@ -52,6 +52,8 @@ final class AppSettings {
     var phoneSort: FileSort { didSet { save(phoneSort, .phoneSort) } }
     var foldersFirst: Bool { didSet { save(foldersFirst, .foldersFirst) } }
     var showStatusBar: Bool { didSet { save(showStatusBar, .showStatusBar) } }
+    /// Show pictures of photos and other files in place of their icons.
+    var showIconPreviews: Bool { didSet { save(showIconPreviews, .showIconPreviews) } }
     var showMacPane: Bool { didSet { save(showMacPane, .showMacPane) } }
     var macPaneOnLeft: Bool { didSet { save(macPaneOnLeft, .macPaneOnLeft) } }
 
@@ -92,6 +94,7 @@ final class AppSettings {
         phoneSort = sort(.phoneSort)
         foldersFirst = bool(.foldersFirst, true)
         showStatusBar = bool(.showStatusBar, true)
+        showIconPreviews = bool(.showIconPreviews, true)
         // the phone alone by default; files go to and from Finder
         showMacPane = bool(.showMacPane, false)
         macPaneOnLeft = bool(.macPaneOnLeft, true)
@@ -153,7 +156,7 @@ final class AppSettings {
     private enum Key: String {
         case appearance, connectAutomatically
         case showHiddenFilesOnMac, showHiddenFilesOnPhone, macViewMode, phoneViewMode, macSort, phoneSort
-        case foldersFirst, showStatusBar, showMacPane, macPaneOnLeft
+        case foldersFirst, showStatusBar, showIconPreviews, showMacPane, macPaneOnLeft
         case showOverallProgressToPhone, showOverallProgressToMac, notifyWhenTransfersFinish, downloadFolder
         case checkForUpdatesAutomatically, includeBetaUpdates
         case lastWelcomeVersion

@@ -32,7 +32,10 @@
 		67F3F0DB34C35435F4888B7A /* MTPBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C841F0364DEB3CE503E2F56 /* MTPBackend.swift */; };
 		6EE42301EEE229FDAA245D1E /* MTPTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A356B1FC43D9655029F0D3F /* MTPTypes.swift */; };
 		70B557A958FEF288ACEB210E /* AppModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234D7BA2CCECF9C40A75EB04 /* AppModelTests.swift */; };
+		718BAF81E3F27A9D11338EB3 /* PhoneThumbnails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E95F521C651AAC16766BEE /* PhoneThumbnails.swift */; };
+		75793421180DE00F982E29C4 /* PreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849415A8B20229121AA792E0 /* PreviewTests.swift */; };
 		7BAA1BD06AB8B90BB4FE8C11 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3325BE51387AD792D82B3826 /* MainView.swift */; };
+		7CBAEFE47C3C805AE3667291 /* VideoFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 296DB49A80C92EFD885CD394 /* VideoFrame.swift */; };
 		84A0E32E48C95909EA527696 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBECDCDAE6D42A8039A7EBB8 /* SettingsView.swift */; };
 		84B09C562B065B8A9A55931F /* FileItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D5A78BE79476D3DEEFE1454 /* FileItem.swift */; };
 		8E02C79B886C4F26DE35876A /* Symbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = E79E1E74EFE0EBD5F5CC7297 /* Symbols.swift */; };
@@ -43,6 +46,7 @@
 		A883F0B06538CD93A71442C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8240F378EF993E16CFC76715 /* Assets.xcassets */; };
 		A9EAC0D20D7FF28CEE133281 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7B0B7996697EB021E18431 /* Sheets.swift */; };
 		B2586F27D62393EF69D67656 /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16B1707AAA4ED39AF9F9CEC6 /* Log.swift */; };
+		B2F5EE8E8685464BC3A29E12 /* PhoneFileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60086E6085D91D81827B1ADD /* PhoneFileCache.swift */; };
 		B80B480AAD5608933B10B98A /* MTPEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD943349BDBE65EEFE54B588 /* MTPEngineTests.swift */; };
 		B87A6F118CB3B5A95929D91C /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C783F5E1F9FB035904305583 /* HelpView.swift */; };
 		BA013D6D7B12C6AE76A8B52B /* QuickLookController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 589BAC77CDD24B33F7B15BAA /* QuickLookController.swift */; };
@@ -74,14 +78,17 @@
 		1E0C40659B119B8F774D7413 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		234D7BA2CCECF9C40A75EB04 /* AppModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelTests.swift; sourceTree = "<group>"; };
 		2671200C3E63A22A584F3D88 /* TransferViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferViews.swift; sourceTree = "<group>"; };
+		296DB49A80C92EFD885CD394 /* VideoFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFrame.swift; sourceTree = "<group>"; };
 		3325BE51387AD792D82B3826 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		429D7054DCD137950A23AD08 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
 		46AFB4C717C1F66C4D00689B /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		49E95F521C651AAC16766BEE /* PhoneThumbnails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneThumbnails.swift; sourceTree = "<group>"; };
 		4B6671E85E77EF0F2A8C8F91 /* TransferCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferCoordinator.swift; sourceTree = "<group>"; };
 		4DBB7A5C479A39C1CDA25245 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		5525262692239EB48277F9FB /* FileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileListView.swift; sourceTree = "<group>"; };
 		589BAC77CDD24B33F7B15BAA /* QuickLookController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLookController.swift; sourceTree = "<group>"; };
 		5BE46F2B953161F4BC7E24AC /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
+		60086E6085D91D81827B1ADD /* PhoneFileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneFileCache.swift; sourceTree = "<group>"; };
 		6337084C538CAF485ABF878E /* Macinroid.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Macinroid.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		681DD5D8BF9186DC50D72C98 /* BrowserSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserSupport.swift; sourceTree = "<group>"; };
 		6B6CCE51FD363B35348D8077 /* USBTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBTransport.swift; sourceTree = "<group>"; };
@@ -93,6 +100,7 @@
 		7E4C4512E34B1E291183D05D /* Macinroid.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Macinroid.entitlements; sourceTree = "<group>"; };
 		811CA8FAA06FCE87382E7004 /* ProblemReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProblemReport.swift; sourceTree = "<group>"; };
 		8240F378EF993E16CFC76715 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		849415A8B20229121AA792E0 /* PreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewTests.swift; sourceTree = "<group>"; };
 		850BBB4E053A1C873FF3AD8D /* DeviceInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfo.swift; sourceTree = "<group>"; };
 		87A9F22565683EDFB29025F5 /* USBMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBMonitor.swift; sourceTree = "<group>"; };
 		8D5A78BE79476D3DEEFE1454 /* FileItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileItem.swift; sourceTree = "<group>"; };
@@ -161,11 +169,14 @@
 				429D7054DCD137950A23AD08 /* Formatting.swift */,
 				CDD273186347F44EDD303E08 /* LocalFileSystem.swift */,
 				16B1707AAA4ED39AF9F9CEC6 /* Log.swift */,
+				60086E6085D91D81827B1ADD /* PhoneFileCache.swift */,
+				49E95F521C651AAC16766BEE /* PhoneThumbnails.swift */,
 				811CA8FAA06FCE87382E7004 /* ProblemReport.swift */,
 				589BAC77CDD24B33F7B15BAA /* QuickLookController.swift */,
 				F03D46C7D023E4706A6D8875 /* TransferFeedback.swift */,
 				4DBB7A5C479A39C1CDA25245 /* UpdateChecker.swift */,
 				87A9F22565683EDFB29025F5 /* USBMonitor.swift */,
+				296DB49A80C92EFD885CD394 /* VideoFrame.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -187,6 +198,7 @@
 				5BE46F2B953161F4BC7E24AC /* ModelTests.swift */,
 				DBDE4AF3AEEC4AB9906B1361 /* MTPCodingTests.swift */,
 				FD943349BDBE65EEFE54B588 /* MTPEngineTests.swift */,
+				849415A8B20229121AA792E0 /* PreviewTests.swift */,
 			);
 			path = MacinroidTests;
 			sourceTree = "<group>";
@@ -449,6 +461,8 @@
 				327C6C79228969887EE8A6DE /* MacinroidApp.swift in Sources */,
 				7BAA1BD06AB8B90BB4FE8C11 /* MainView.swift in Sources */,
 				266DD6554518B2A4786DD660 /* PaneView.swift in Sources */,
+				B2F5EE8E8685464BC3A29E12 /* PhoneFileCache.swift in Sources */,
+				718BAF81E3F27A9D11338EB3 /* PhoneThumbnails.swift in Sources */,
 				4391BA5C7C82D63ECD10A14F /* ProblemReport.swift in Sources */,
 				BA013D6D7B12C6AE76A8B52B /* QuickLookController.swift in Sources */,
 				84A0E32E48C95909EA527696 /* SettingsView.swift in Sources */,
@@ -463,6 +477,7 @@
 				62707DE9C2500ABA820D8F8A /* USBMonitor.swift in Sources */,
 				8FDAAE871F77011EFCDE6376 /* USBTransport.swift in Sources */,
 				4D24C43A9CF2A12EC6DE7056 /* UpdateChecker.swift in Sources */,
+				7CBAEFE47C3C805AE3667291 /* VideoFrame.swift in Sources */,
 				31B61307D7986AE718D0333A /* WelcomeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -477,6 +492,7 @@
 				0FDB51ADA1AD005A298E20DD /* MTPCodingTests.swift in Sources */,
 				B80B480AAD5608933B10B98A /* MTPEngineTests.swift in Sources */,
 				DF86669CB16364F1423A7156 /* ModelTests.swift in Sources */,
+				75793421180DE00F982E29C4 /* PreviewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -592,7 +608,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid";
 			};
@@ -609,7 +625,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid";
 			};

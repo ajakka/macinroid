@@ -9,13 +9,14 @@ struct MTPFile: Equatable {
     var isFolder: Bool
     var size: Int64
     var modified: Date?
+    var hasThumbnail = false
 
     static func root() -> MTPFile {
         MTPFile(handle: MTPHandle.root, parent: MTPHandle.root, name: "", path: FilePath.root, isFolder: true, size: 0)
     }
 
     var fileItem: FileItem {
-        FileItem(path: path, name: name, isFolder: isFolder, size: size, modified: modified)
+        FileItem(path: path, name: name, isFolder: isFolder, size: size, modified: modified, hasThumbnail: hasThumbnail)
     }
 }
 
@@ -120,7 +121,8 @@ final class MTPFileSystem {
             path: FilePath.join(parentPath, info.filename),
             isFolder: info.isFolder,
             size: size,
-            modified: info.modificationDate
+            modified: info.modificationDate,
+            hasThumbnail: !info.isFolder && info.hasThumbnail
         )
     }
 
@@ -327,6 +329,46 @@ final class MTPFileSystem {
         }
         // the folder's table of names is rebuilt the next time it is needed
         childrenByFolder = childrenByFolder.filter { $0.key.storage != storage }
+    }
+
+    // MARK: Looking inside files
+
+    /// The small picture the device keeps of a file, usually a JPEG, or nil when it has none.
+    func thumbnail(storage: UInt32, path: String) throws -> Data? {
+        let handle = try knownHandle(of: path, storage: storage)
+        do {
+            let data = try session.getThumb(handle)
+            return data.isEmpty ? nil : data
+        } catch let error as MTPError where error.responseCode != nil {
+            // NoThumbnailPresent, or whatever else a device answers when it has none
+            return nil
+        } catch {
+            throw deviceError(error, or: .fileObjectRead)
+        }
+    }
+
+    /// Up to `length` bytes of a file from `offset`; fewer at its end.
+    func read(storage: UInt32, path: String, offset: Int64, length: Int) throws -> Data {
+        let handle = try knownHandle(of: path, storage: storage)
+        do {
+            return try session.getPartialObject(handle, offset: UInt64(max(0, offset)), length: UInt32(clamping: length))
+        } catch {
+            throw deviceError(error, or: .fileObjectRead)
+        }
+    }
+
+    /// The handle of the object at `path`. A folder that was just listed
+    /// already says which handle each of its names has, so asking about the
+    /// files shown in it costs no requests beyond the one that matters.
+    private func knownHandle(of path: String, storage: UInt32) throws -> UInt32 {
+        var handle = MTPHandle.root
+        for component in FilePath.normalize(path).split(separator: "/") {
+            guard let next = childrenByFolder[FolderKey(storage: storage, handle: handle)]?[component.lowercased()] else {
+                return try resolve(path, storage: storage).handle
+            }
+            handle = next
+        }
+        return handle
     }
 
     // MARK: Copying to the device

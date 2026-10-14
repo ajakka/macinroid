@@ -25,7 +25,7 @@ enum FileIcons {
         return image
     }
 
-    /// A preview of the file's contents, for files on the Mac that have one.
+    /// A preview of the contents of a file on the Mac, for files that have one.
     static func thumbnail(for item: FileItem, size: CGFloat, scale: CGFloat, completion: @escaping @MainActor (NSImage) -> Void) {
         guard !item.isFolder, item.contentType.conforms(to: .image) || item.contentType.conforms(to: .movie) || item.contentType.conforms(to: .pdf) else {
             return
@@ -57,7 +57,7 @@ enum FileIcons {
 
 extension NSPasteboard.PasteboardType {
     /// A file or folder on the phone, dragged from the phone pane.
-    static let phoneItem = NSPasteboard.PasteboardType("com.anyfikra.macinroid.phone-item")
+    static let phoneItem = NSPasteboard.PasteboardType("com.macinroid.phone-item")
 }
 
 /// What the phone pane puts on the pasteboard for one dragged item: a file
@@ -247,10 +247,10 @@ extension AppModel {
 
             if pane == .mac {
                 menu.addItem(ActionMenuItem("Show in Finder", symbol: "finder") { [self] in showInFinder(selected) })
-                menu.addItem(ActionMenuItem("Quick Look", symbol: "eye") { [self] in
-                    quickLook.toggle(selected.map { URL(fileURLWithPath: $0.path) })
-                })
             }
+            menu.addItem(ActionMenuItem("Quick Look", symbol: "eye", isEnabled: canQuickLook(in: pane)) { [self] in
+                toggleQuickLook(in: pane)
+            })
             menu.addItem(ActionMenuItem("Rename…", symbol: "pencil", isEnabled: selected.count == 1) { [self] in requestRename(in: pane) })
             menu.addItem(ActionMenuItem(pane == .mac ? "Move to Trash" : "Delete…", symbol: "trash") { [self] in deleteSelection(in: pane) })
             menu.addItem(.separator())
@@ -325,8 +325,8 @@ enum BrowserKeys {
         case (KeyCode.tab, []), (KeyCode.tab, .shift):
             app.switchPane()
         case (KeyCode.space, []):
-            guard pane == .mac, !browser.selection.isEmpty else { return false }
-            app.quickLook.toggle(browser.selectedItems.map { URL(fileURLWithPath: $0.path) })
+            guard !browser.selection.isEmpty || app.quickLook.isVisible else { return false }
+            app.toggleQuickLook(in: pane)
         case (KeyCode.delete, []), (KeyCode.forwardDelete, []):
             guard !browser.selection.isEmpty else { return false }
             app.deleteSelection(in: pane)

@@ -98,6 +98,8 @@ final class TransferCoordinator {
 
     /// Called once a job is over, before the next one starts.
     @ObservationIgnored var onJobEnded: (@MainActor (TransferJob) async -> Void)?
+    /// Called before every job, to stop whatever else is using the connection.
+    @ObservationIgnored var beforeEachJob: (@MainActor () async -> Void)?
 
     @ObservationIgnored private let backend: any DeviceBackend
     @ObservationIgnored private var prepareSteps: [UInt64: Prepare] = [:]
@@ -167,6 +169,8 @@ final class TransferCoordinator {
         job.phase = .preparing
         active = job
         samples = []
+
+        await beforeEachJob?()
 
         if let prepare = prepareSteps.removeValue(forKey: job.id) {
             guard let request = await prepare(job.request) else {
