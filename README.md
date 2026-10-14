@@ -30,6 +30,21 @@ and paste between the two.
 - macOS 14 Sonoma or later
 - An Android phone, and a USB cable that carries data (some only charge)
 
+## Install
+
+With [Homebrew](https://brew.sh):
+
+```sh
+brew install --cask ajakka/tap/macinroid
+```
+
+Later versions arrive with `brew upgrade --cask macinroid`.
+
+Or download `Macinroid-<version>.zip` from the
+[latest release](https://github.com/ajakka/macinroid/releases/latest), unzip it,
+and move Macinroid to your Applications folder. The app is signed and notarized
+by Apple, so it opens like any other.
+
 ## Getting started
 
 1. Open Macinroid and connect your phone with a USB cable.
