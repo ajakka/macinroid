@@ -134,8 +134,6 @@ the same wire protocol, down to short and empty USB packets.
   request; if it does not, Macinroid reconnects, which takes a second or two.
 - Dates from the phone are read as local time, which is right when the phone and
   the Mac are set to the same time zone.
-- Downloading from a phone has been proven on real hardware; uploading and
-  cancelling have so far been tested only against the simulated phone.
 
 ## Acknowledgements
 
