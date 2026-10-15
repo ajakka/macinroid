@@ -14,6 +14,12 @@ and paste between the two.
   </picture>
 </p>
 
+## Support
+
+Macinroid is free. If it saves you some time, you can buy me a coffee on Ko-fi.
+
+<a href="https://ko-fi.com/anyfikra"><img src="https://storage.ko-fi.com/cdn/kofi2.png?v=3" height="36" alt="Buy Me a Coffee at ko-fi.com"></a>
+
 ## Features
 
 - Drag and drop files between the two systems
