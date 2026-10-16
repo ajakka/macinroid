@@ -41,7 +41,7 @@ Macinroid is free. If it saves you some time, you can buy me a coffee on Ko-fi.
 With [Homebrew](https://brew.sh):
 
 ```sh
-brew install --cask ajakka/tap/macinroid
+brew install --cask anyfikra/tap/macinroid
 ```
 
 Later versions arrive with `brew upgrade --cask macinroid`.
