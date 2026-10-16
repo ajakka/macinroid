@@ -112,6 +112,16 @@ The simulated phone is a folder in `~/Library/Caches/Macinroid/SimulatedDevice`,
 filled with sample content. Its transfers are slowed down so that progress and
 cancelling can be watched.
 
+## Website
+
+The website in `website/` is plain HTML and CSS, with no build step. Its images
+are the ones in `assets/`, which `website/assets` links to. The *Website*
+workflow publishes it to GitHub Pages when either changes on `main`. To preview it:
+
+```sh
+python3 -m http.server -d website     # then open http://localhost:8000
+```
+
 ## How it works
 
 ```

@@ -1,0 +1,48 @@
+name: Website
+
+# Publishes website/ to GitHub Pages. There is no build step: the site is
+# plain HTML and CSS. website/assets links to the repository's assets folder,
+# which the README shares, so the copy below follows that link.
+#
+# Once, in Settings ▸ Pages, set Source to "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "assets/**"
+      - ".github/workflows/website.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# one deployment at a time, and never cancel one halfway
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Gather the site
+        run: cp -RL website _site
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5
