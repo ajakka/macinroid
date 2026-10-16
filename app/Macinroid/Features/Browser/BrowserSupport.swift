@@ -57,7 +57,7 @@ enum FileIcons {
 
 extension NSPasteboard.PasteboardType {
     /// A file or folder on the phone, dragged from the phone pane.
-    static let phoneItem = NSPasteboard.PasteboardType("com.macinroid.phone-item")
+    static let phoneItem = NSPasteboard.PasteboardType("com.anyfikra.macinroid.phone-item")
 }
 
 /// What the phone pane puts on the pasteboard for one dragged item: a file

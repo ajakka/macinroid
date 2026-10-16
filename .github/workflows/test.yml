@@ -1,9 +1,17 @@
 name: Test
 
+# Only changes to the app run the tests, so that edits elsewhere in the
+# repository, such as the website, don't wait for a macOS runner.
 on:
   push:
     branches: [main]
+    paths:
+      - "app/**"
+      - ".github/workflows/test.yml"
   pull_request:
+    paths:
+      - "app/**"
+      - ".github/workflows/test.yml"
 
 concurrency:
   group: test-${{ github.ref }}
@@ -13,6 +21,9 @@ jobs:
   test:
     runs-on: macos-26
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
     steps:
       - uses: actions/checkout@v7
 

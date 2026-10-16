@@ -6,7 +6,7 @@ build/
 DerivedData/
 *.xcuserstate
 xcuserdata/
-*.xcodeproj/project.xcworkspace/xcuserdata/
+**/*.xcodeproj/project.xcworkspace/xcuserdata/
 
 # Environment
 .env

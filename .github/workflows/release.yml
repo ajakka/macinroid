@@ -31,6 +31,9 @@ jobs:
   release:
     runs-on: macos-26
     timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: app
     steps:
       - uses: actions/checkout@v7
 
@@ -157,7 +160,7 @@ jobs:
           tap="$RUNNER_TEMP/tap"
           git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/${TAP_REPOSITORY}.git" "$tap"
           mkdir -p "$tap/Casks"
-          sed -e "s/{{VERSION}}/$VERSION/g" -e "s/{{SHA256}}/$SHA256/g" .github/homebrew/macinroid.rb > "$tap/Casks/macinroid.rb"
+          sed -e "s/{{VERSION}}/$VERSION/g" -e "s/{{SHA256}}/$SHA256/g" "$GITHUB_WORKSPACE/.github/homebrew/macinroid.rb" > "$tap/Casks/macinroid.rb"
           ruby -c "$tap/Casks/macinroid.rb"
 
           cd "$tap"

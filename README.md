@@ -9,8 +9,8 @@ and paste between the two.
 
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="Documents/transfer-dark.png">
-    <img src="Documents/transfer-light.png" width="820" alt="A transfer in progress, with overall progress, speed, time remaining and a button to cancel">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/transfer-dark.png">
+    <img src="assets/transfer-light.png" width="820" alt="A transfer in progress, with overall progress, speed, time remaining and a button to cancel">
   </picture>
 </p>
 
@@ -47,7 +47,7 @@ brew install --cask ajakka/tap/macinroid
 Later versions arrive with `brew upgrade --cask macinroid`.
 
 Or download `Macinroid-<version>.zip` from the
-[latest release](https://github.com/ajakka/macinroid/releases/latest), unzip it,
+[latest release](https://github.com/anyfikra/macinroid/releases/latest), unzip it,
 and move Macinroid to your Applications folder. The app is signed and notarized
 by Apple, so it opens like any other.
 
@@ -89,9 +89,10 @@ with every USB device macOS sees and a trace of the connection attempt.
 ## Building from source
 
 Requirements: Xcode 26. [XcodeGen](https://github.com/yonaskolb/XcodeGen) is only
-needed if you change `project.yml`.
+needed if you change `project.yml`. The app lives in `app/`.
 
 ```sh
+cd app
 open Macinroid.xcodeproj          # then Run, or:
 xcodebuild -project Macinroid.xcodeproj -scheme Macinroid -configuration Release build
 xcodebuild -project Macinroid.xcodeproj -scheme Macinroid test
@@ -114,17 +115,17 @@ cancelling can be watched.
 ## How it works
 
 ```
-Macinroid/
-  App/            app entry point, menus
-  Core/
-    Models/       files, devices, errors, transfers
-    Engine/       DeviceBackend: the MTP engine, and the simulated phone
-      MTP/        USB transport, MTP sessions, file operations
-    Services/     local files, USB hot-plug, settings, logging, updates, problem reports
-    State/        AppModel, BrowserModel (one per pane), DeviceSession, TransferCoordinator
-  Features/       the interface: main window, file views, transfers, sheets, settings, help
-MacinroidTests/
-Scripts/          the app icon's generator
+app/
+  Macinroid/
+    App/            app entry point, menus
+    Core/
+      Models/       files, devices, errors, transfers
+      Engine/       DeviceBackend: the MTP engine, and the simulated phone
+        MTP/        USB transport, MTP sessions, file operations
+      Services/     local files, USB hot-plug, settings, logging, updates, problem reports
+      State/        AppModel, BrowserModel (one per pane), DeviceSession, TransferCoordinator
+    Features/       the interface: main window, file views, transfers, sheets, settings, help
+  MacinroidTests/
 ```
 
 The interface is SwiftUI, with `NSTableView` and `NSCollectionView` for the file
@@ -166,4 +167,4 @@ the same wire protocol, down to short and empty USB packets.
 Macinroid is a rewrite of [OpenMTP](https://github.com/ganeshrvel/openmtp) by
 Ganesh Rathinavel as a native Mac app. Its MTP engine follows the behaviour of the
 Go libraries OpenMTP is built on, go-mtpfs and go-mtpx. Their licences are in
-[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+[THIRD-PARTY-NOTICES.md](app/THIRD-PARTY-NOTICES.md).

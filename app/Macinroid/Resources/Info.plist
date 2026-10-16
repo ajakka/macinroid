@@ -41,7 +41,7 @@
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>MacinroidRepository</key>
-	<string>ajakka/macinroid</string>
+	<string>anyfikra/macinroid</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Macinroid shows your Desktop so that you can copy files between it and your phone.</string>
 	<key>NSDocumentsFolderUsageDescription</key>

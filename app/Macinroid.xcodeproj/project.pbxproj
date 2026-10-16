@@ -520,7 +520,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid;
 				PRODUCT_NAME = Macinroid;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -608,7 +608,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid";
 			};
@@ -625,7 +625,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Macinroid.app/Contents/MacOS/Macinroid";
 			};
@@ -707,7 +707,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.macinroid;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anyfikra.macinroid;
 				PRODUCT_NAME = Macinroid;
 				SDKROOT = macosx;
 				SWIFT_EMIT_LOC_STRINGS = YES;

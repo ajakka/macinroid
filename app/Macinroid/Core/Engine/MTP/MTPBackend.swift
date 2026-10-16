@@ -11,7 +11,7 @@ final class MTPBackend: DeviceBackend, @unchecked Sendable {
     typealias Connector = @Sendable () throws -> any MTPTransport
 
     private let connector: Connector
-    private let queue = DispatchQueue(label: "com.macinroid.mtp", qos: .userInitiated)
+    private let queue = DispatchQueue(label: "com.anyfikra.macinroid.mtp", qos: .userInitiated)
     private let cancelledTransfers = OSAllocatedUnfairLock(initialState: Set<UInt64>())
 
     /// The open connection. Only touched on `queue`.
